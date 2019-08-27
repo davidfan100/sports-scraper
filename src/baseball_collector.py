@@ -17,15 +17,30 @@ def scrape_data_website():
     soup_handler = BeautifulSoup(response.text, "html.parser")
     temp = soup_handler.find_all('b') # bold means the player are active
 
-    urls = []
-    for i in temp:
-        if i.a == None:
-            continue
+    # urls = []
+    # for i in temp:
+    #     if i.a == None:
+    #         continue
         
-        urls.append(base_url + i.a.get('href'))
+    #     urls.append(base_url + i.a.get('href'))
         
     
-    print(urls)
+    temp_url = 'https://www.baseball-reference.com/players/a/abadfe01.shtml'
+    response = requests.get(temp_url)
+    soup_handler = BeautifulSoup(response.text, 'html.parser')
+
+    # determine a way to go through each row to extract the data
+    temp = soup_handler.find(id='')
+    counter = 0
+    arr = []
+    for i in temp:
+        print(counter)
+        counter = counter + 1
+        arr.append(i)
+    print(arr[3])
+    # temp = soup_handler.find(id="pitching_standard.2019")
+    # for i in temp:
+    #     print(i.text)
 
 
 
