@@ -8,6 +8,7 @@
 import sqlite3
 import requests
 import logging
+import datetime
 from bs4 import BeautifulSoup
 def scrape_data_website():
     start_url = 'https://www.baseball-reference.com/players/a'
@@ -40,37 +41,37 @@ def scrape_data_website():
     temp_height =  player_height.split('-')
     player_height = int(temp_height[0]) * 12 + int(temp_height[1])
     player_weight = page_info.find('span', {'itemprop': 'weight'}).text[:-2]
+    player_name = page_info.find('h1', {'itemprop': 'name'}).text
 
     for temp_i in page_info.find_all('a'):
         if 'play-index' in temp_i.get('href'):
-            player_debut = temp_i.text.split()[-1]
+            # determining player's debut year
+            curr_year = int(temp_i.text.split()[-1])
             break
 
-    print(player_height)
-    print(player_weight)
-    print(player_debut)
-    # player_years = {}
-    # player_years['2019'] = []
-    # curr_year = 2019
+    player_years = {}
+    player_years[str(curr_year)] = []
+    most_recent_year = datetime.datetime.now().year
 
-    # while True:
-    #     if str(curr_year) not in player_years.keys():
-    #         player_years[str(curr_year)] = []
+    while curr_year <= int(most_recent_year):
+        if str(curr_year) not in player_years.keys():
+            player_years[str(curr_year)] = []
+
+        curr_year_stats = soup_handler.find(id="pitching_standard.{}".format(str(curr_year)))
         
-    #     curr_year_stats = soup_handler.find(id="pitching_standard.{}".format(str(curr_year)))
-        
-    #     if curr_year_stats == None:
-    #         break
-        
-    #     player_years[str(curr_year)].append([])
-    #     player_years[str(curr_year)][-1].append(curr_year)
+        if curr_year_stats != None:
+            player_years[str(curr_year)].append([])
+            player_years[str(curr_year)][-1].append(player_name)
+            player_years[str(curr_year)][-1].append(curr_year)
 
-    #     for stat_val in curr_year_stats.find_all('td'):
-    #         player_years[str(curr_year)][-1].append(stat_val.text)
+            for stat_val in curr_year_stats.find_all('td'):
+                player_years[str(curr_year)][-1].append(stat_val.text)
 
-    #     curr_year -= 1
+            player_years[str(curr_year)][-1].append(player_height)
+            player_years[str(curr_year)][-1].append(player_weight)
+        curr_year += 1
 
-    # print(player_years)
+    print(player_years)
         
     # determine a way to go through each row to extract the data
 
