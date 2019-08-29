@@ -29,19 +29,50 @@ def scrape_data_website():
     response = requests.get(temp_url)
     soup_handler = BeautifulSoup(response.text, 'html.parser')
 
-    # determine a way to go through each row to extract the data
-    temp = soup_handler.find(id='')
-    counter = 0
-    arr = []
-    for i in temp:
-        print(counter)
-        counter = counter + 1
-        arr.append(i)
-    print(arr[3])
-    # temp = soup_handler.find(id="pitching_standard.2019")
-    # for i in temp:
-    #     print(i.text)
 
+    '''
+    Start from most recent year and then go backwards to see if there exists a
+    value for them
+    '''
+
+    page_info = soup_handler.find(id='meta')
+    player_height = page_info.find('span', {'itemprop': 'height'}).text
+    temp_height =  player_height.split('-')
+    player_height = int(temp_height[0]) * 12 + int(temp_height[1])
+    player_weight = page_info.find('span', {'itemprop': 'weight'}).text[:-2]
+
+    for temp_i in page_info.find_all('a'):
+        if 'play-index' in temp_i.get('href'):
+            player_debut = temp_i.text.split()[-1]
+            break
+
+    print(player_height)
+    print(player_weight)
+    print(player_debut)
+    # player_years = {}
+    # player_years['2019'] = []
+    # curr_year = 2019
+
+    # while True:
+    #     if str(curr_year) not in player_years.keys():
+    #         player_years[str(curr_year)] = []
+        
+    #     curr_year_stats = soup_handler.find(id="pitching_standard.{}".format(str(curr_year)))
+        
+    #     if curr_year_stats == None:
+    #         break
+        
+    #     player_years[str(curr_year)].append([])
+    #     player_years[str(curr_year)][-1].append(curr_year)
+
+    #     for stat_val in curr_year_stats.find_all('td'):
+    #         player_years[str(curr_year)][-1].append(stat_val.text)
+
+    #     curr_year -= 1
+
+    # print(player_years)
+        
+    # determine a way to go through each row to extract the data
 
 
 if __name__ == '__main__':
