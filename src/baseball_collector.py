@@ -11,61 +11,81 @@ import logging
 import datetime
 from bs4 import BeautifulSoup
 def scrape_data_website():
-    start_url = 'https://www.baseball-reference.com/players/a'
+    start_url = 'https://www.baseball-reference.com/players/'
     base_url = 'https://www.baseball-reference.com'
-    response = requests.get(start_url)
-    
-    soup_handler = BeautifulSoup(response.text, "html.parser")
-    temp = soup_handler.find_all('b') # bold means the player are active
+    curr_letter = 'a'
+    urls_list = []
 
-    urls = []
-    for i in temp:
-        if i.a == None:
-            continue
+    while curr_letter <= 'z':
+        curr_url = start_url + curr_letter
+        response = requests.get(curr_url)
+    
+        soup_handler = BeautifulSoup(response.text, "html.parser")
+        temp = soup_handler.find_all('b') # bold means the player are active
+
+        urls = []
+        for i in temp:
+            if i.a == None:
+                continue
         
-        urls.append(base_url + i.a.get('href'))
+            urls.append(base_url + i.a.get('href'))
+
+        if urls != []:
+            urls_list.append(urls)
+        
+        curr_letter = chr(ord(curr_letter) + 1)
         
     player_years = {}
     most_recent_year = datetime.datetime.now().year
+    
+    for url_arr in urls_list:
+        print(url_arr[0])
+        for url in url_arr:
+            player_url = url
+            response = requests.get(player_url)
+            soup_handler = BeautifulSoup(response.text, 'html.parser')
 
-    for url in urls:
-        player_url = url
-        response = requests.get(player_url)
-        soup_handler = BeautifulSoup(response.text, 'html.parser')
-
-        if soup_handler.find(id="pitching_standard.{}".format(str(most_recent_year))) == None:
-            continue
+            if (soup_handler.find(id="pitching_standard.{}".format(str(most_recent_year))) == None
+                and soup_handler.find(id="batting_standard.{}".format(str(most_recent_year))) == None):
+                continue 
         
-        page_info = soup_handler.find(id='meta')
-        player_height = page_info.find('span', {'itemprop': 'height'}).text
-        temp_height =  player_height.split('-')
-        player_height = int(temp_height[0]) * 12 + int(temp_height[1])
-        player_weight = page_info.find('span', {'itemprop': 'weight'}).text[:-2]
-        player_name = page_info.find('h1', {'itemprop': 'name'}).text
-        print(player_name)
-        for temp_i in page_info.find_all('a'):
-            if 'play-index' in temp_i.get('href'):
-                # determining player's debut year
-                curr_year = int(temp_i.text.split()[-1])
-                break
+            page_info = soup_handler.find(id='meta')
+
+            player_height = page_info.find('span', {'itemprop': 'height'}).text
+            temp_height =  player_height.split('-')
+            player_height = int(temp_height[0]) * 12 + int(temp_height[1])
+
+            player_weight = page_info.find('span', {'itemprop': 'weight'}).text[:-2]
+
+            player_name = page_info.find('h1', {'itemprop': 'name'}).text
+
+            for temp_i in page_info.find_all('a'):
+                if 'play-index' in temp_i.get('href'):
+                    # determining player's debut year
+                    curr_year = int(temp_i.text.split()[-1])
+                    break
         
-        while curr_year <= int(most_recent_year):
-            if str(curr_year) not in player_years.keys():
-                player_years[str(curr_year)] = []
+            while curr_year <= int(most_recent_year):
+                if str(curr_year) not in player_years.keys():
+                    player_years[str(curr_year)] = []
 
-            curr_year_stats = soup_handler.find(id="pitching_standard.{}".format(str(curr_year)))
+                curr_year_stats = soup_handler.find(id="pitching_standard.{}".format(str(curr_year)))
         
-            if curr_year_stats != None:
-                player_years[str(curr_year)].append([])
-                player_years[str(curr_year)][-1].append(player_name)
-                player_years[str(curr_year)][-1].append(curr_year)
+                if curr_year_stats == None:
+                    curr_year_stats = soup_handler.find(id='batting_standard.{}'.format(str(curr_year)))
+                
+                if curr_year_stats != None:
+                    player_years[str(curr_year)].append([])
+                    player_years[str(curr_year)][-1].append(player_name)
+                    player_years[str(curr_year)][-1].append(curr_year)
 
-                for stat_val in curr_year_stats.find_all('td'):
-                    player_years[str(curr_year)][-1].append(stat_val.text)
+                    for stat_val in curr_year_stats.find_all('td'):
+                        player_years[str(curr_year)][-1].append(stat_val.text)
 
-                player_years[str(curr_year)][-1].append(player_height)
-                player_years[str(curr_year)][-1].append(player_weight)
-            curr_year += 1
+                    player_years[str(curr_year)][-1].append(player_height)
+                    player_years[str(curr_year)][-1].append(player_weight)
+                
+                curr_year += 1
 
     return player_years
 
@@ -104,14 +124,14 @@ def transfer_to_sql_table(stats, data):
 
     
 if __name__ == '__main__':
-    # player_years = scrape_data_website()
+    player_years = scrape_data_website()
+    print(player_years['2003'])
+    # batting_stats = ['Name text', 'Year int', 'Age int', 'Team text', 'League text', 'GamesPlayed int', 'PlateAppearances int', 'AtBats int', 'Runs int', 'Hits int', 'Doubles int', 'Triples int',
+    #     'HR int', 'RBI int', 'SB int', 'CS int', 'BB int', 'SO int', 'BA real', 'OBP real', 'SLG real', 'OPS real', 'OPSPlus real', 'TB int', 'GBP int', 'HBP int', 'SH int', 'SF int', 'IBB int', 'Pos text', 'Awards text']
 
-    batting_stats = ['Name text', 'Year int', 'Age int', 'Team text', 'League text', 'GamesPlayed int', 'PlateAppearances int', 'AtBats int', 'Runs int', 'Hits int', 'Doubles int', 'Triples int',
-        'HR int', 'RBI int', 'SB int', 'CS int', 'BB int', 'SO int', 'BA real', 'OBP real', 'SLG real', 'OPS real', 'OPSPlus real', 'TB int', 'GBP int', 'HBP int', 'SH int', 'SF int', 'IBB int', 'Pos text', 'Awards text']
+    # pitching_stats = ['Name text', 'Year int', 'Age int', 'Team text', 'League text', 'W int', 'L int', 'WinLossPercentage real', 'ERA real', 'G int', 'GS int', 'GF int', 'CG int',
+    #     'SHO int', 'SV int', 'IP real', 'H int', 'R int', 'ER real', 'HR int', 'BB int', 'IBB int', 'SO int', 'HBP int', 'BK int', 'WP int', 'BF int', 'ERAPLUS int', 'FIP real', 'WHIP real',
+    #     'H9 real', 'BB9 real', 'SO9 real', 'StrikeoutsPerWalk real', 'Awards text']
 
-    pitching_stats = ['Name text', 'Year int', 'Age int', 'Team text', 'League text', 'W int', 'L int', 'WinLossPercentage real', 'ERA real', 'G int', 'GS int', 'GF int', 'CG int',
-        'SHO int', 'SV int', 'IP real', 'H int', 'R int', 'ER real', 'HR int', 'BB int', 'IBB int', 'SO int', 'HBP int', 'BK int', 'WP int', 'BF int', 'ERAPLUS int', 'FIP real', 'WHIP real',
-        'H9 real', 'BB9 real', 'SO9 real', 'StrikeoutsPerWalk real', 'Awards text']
-
-    create_tables(batting_stats, pitching_stats)
+    # create_tables(batting_stats, pitching_stats)
     # transfer_to_sql_table(pitching_stats, player_years)
