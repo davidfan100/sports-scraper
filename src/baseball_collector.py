@@ -55,7 +55,7 @@ def scrape_data_website():
             temp_height =  player_height.split('-')
             player_height = int(temp_height[0]) * 12 + int(temp_height[1])
 
-            player_weight = page_info.find('span', {'itemprop': 'weight'}).text[:-2]
+            player_weight = int(page_info.find('span', {'itemprop': 'weight'}).text[:-2])
 
             player_name = page_info.find('h1', {'itemprop': 'name'}).text
 
@@ -80,7 +80,13 @@ def scrape_data_website():
                     player_years[str(curr_year)][-1].append(curr_year)
 
                     for stat_val in curr_year_stats.find_all('td'):
-                        player_years[str(curr_year)][-1].append(stat_val.text)
+                        if '.' in stat_val.text:
+                            player_years[str(curr_year)][-1].append(stat_val.text))
+                        elif stat_val.text.isdigit():
+                            player_years[str(curr_year)][-1].append(stat_val.text))
+                        else:
+                            player_years[str(curr_year)][-1].append("'{}'".format(str(stat_val.text)))
+
 
                     player_years[str(curr_year)][-1].append(player_height)
                     player_years[str(curr_year)][-1].append(player_weight)
@@ -107,31 +113,51 @@ def create_tables(batting_stats, pitching_stats):
     conn.close()
 
 
-def transfer_to_sql_table(stats, data):
+def transfer_to_sql_table(data):
     conn = sqlite3.connect('../data/baseballtable.db')
     cur = conn.cursor()
-    # cur.execute('''
-    #     CREATE TABLE PitchingStats
-    #     ({})
-    # '''.format(','.join(stats)))
 
-
-    data_temp = data['2010'].pop(0)
-    print(len(data_temp))
+    print("Inserting into SQL Table...")
+    temp_arr = ['Fernando Abad', '2010', '24', 'HOU', 'NL', '0', '1', '0.0', '2.84', '22', '0', '6', '0', '0', '0', '19.0', '14', '6', '6', '3', '5', '0', '12', '0', '0', '0', '76', '142', '4.66', '1.0', '6.6', '1.4', '2.4', '5.7', '2.4', '', '73', '220']
+    new_arr = []
+    for i in temp_arr:
+        new_arr.append("'{}'".format(i))
+    a = ','.join(new_arr)
+    print(a)
+    cur.execute('''
+        INSERT INTO PitchingStats VALUES ({})
+    '''.format(a))
+    # for year in data.keys():
+    #     print('Current year: {}'.format(year))
+    #     for player_stats in data[year]:
+    #         # print(player_stats)
+    #         if len(player_stats) == 38:
+    #             print(player_stats)
+    #             print('Insert to pitching')
+    #             cur.execute('''
+    #                 INSERT INTO PitchingStats VALUES ({})
+    #             '''.format(','.join(player_stats)))
+    #         else:
+    #             print('Insert to batting')
+    #             cur.execute('''
+    #                 INSERT INTO BattingStats VALUES ({})
+    #             '''.format(','.join(player_stats)))
+    
 
     conn.commit()
     conn.close()
 
     
 if __name__ == '__main__':
-    player_years = scrape_data_website()
-    print(player_years['2003'])
-    # batting_stats = ['Name text', 'Year int', 'Age int', 'Team text', 'League text', 'GamesPlayed int', 'PlateAppearances int', 'AtBats int', 'Runs int', 'Hits int', 'Doubles int', 'Triples int',
-    #     'HR int', 'RBI int', 'SB int', 'CS int', 'BB int', 'SO int', 'BA real', 'OBP real', 'SLG real', 'OPS real', 'OPSPlus real', 'TB int', 'GBP int', 'HBP int', 'SH int', 'SF int', 'IBB int', 'Pos text', 'Awards text']
+    # player_years = scrape_data_website()
 
-    # pitching_stats = ['Name text', 'Year int', 'Age int', 'Team text', 'League text', 'W int', 'L int', 'WinLossPercentage real', 'ERA real', 'G int', 'GS int', 'GF int', 'CG int',
-    #     'SHO int', 'SV int', 'IP real', 'H int', 'R int', 'ER real', 'HR int', 'BB int', 'IBB int', 'SO int', 'HBP int', 'BK int', 'WP int', 'BF int', 'ERAPLUS int', 'FIP real', 'WHIP real',
-    #     'H9 real', 'BB9 real', 'SO9 real', 'StrikeoutsPerWalk real', 'Awards text']
+    batting_stats = ['Name text', 'Year int', 'Age int', 'Team text', 'League text', 'GamesPlayed int', 'PlateAppearances int', 'AtBats int', 'Runs int', 'Hits int', 'Doubles int', 'Triples int',
+        'HR int', 'RBI int', 'SB int', 'CS int', 'BB int', 'SO int', 'BA real', 'OBP real', 'SLG real', 'OPS real', 'OPSPlus real', 'TB int', 'GBP int', 'HBP int', 'SH int', 'SF int', 'IBB int', 'Pos text', 'Awards text',
+        'Height int', 'Weight int']
+
+    pitching_stats = ['Name text', 'Year int', 'Age int', 'Team text', 'League text', 'W int', 'L int', 'WinLossPercentage real', 'ERA real', 'G int', 'GS int', 'GF int', 'CG int',
+        'SHO int', 'SV int', 'IP real', 'H int', 'R int', 'ER real', 'HR int', 'BB int', 'IBB int', 'SO int', 'HBP int', 'BK int', 'WP int', 'BF int', 'ERAPLUS int', 'FIP real', 'WHIP real',
+        'H9 real', 'HR9 real', 'BB9 real', 'SO9 real', 'StrikeoutsPerWalk real', 'Awards text', 'Height int', 'Weight int']
 
     # create_tables(batting_stats, pitching_stats)
-    # transfer_to_sql_table(pitching_stats, player_years)
+    transfer_to_sql_table(pitching_stats)
