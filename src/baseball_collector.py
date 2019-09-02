@@ -10,7 +10,12 @@ import requests
 import logging
 import datetime
 from bs4 import BeautifulSoup
-def scrape_data_website():
+
+def scrape_stats_by_year():
+    base_url = 'https://www.baseball-reference.com/leagues/MLB/'
+    start_year = str(2003)
+    return
+def scrape_stats_by_player():
     start_url = 'https://www.baseball-reference.com/players/'
     base_url = 'https://www.baseball-reference.com'
     curr_letter = 'a'
@@ -152,7 +157,8 @@ def transfer_to_sql_table(data):
 
     
 if __name__ == '__main__':
-    player_years = scrape_data_website()
+    # player_years = scrape_stats_by_player()
+    scrape_stats_by_year()
 
     batting_stats = ['Name text', 'Year int', 'Age int', 'Team text', 'League text', 'GamesPlayed int', 'PlateAppearances int', 'AtBats int', 'Runs int', 'Hits int', 'Doubles int', 'Triples int',
         'HR int', 'RBI int', 'SB int', 'CS int', 'BB int', 'SO int', 'BA real', 'OBP real', 'SLG real', 'OPS real', 'OPSPlus real', 'TB int', 'GBP int', 'HBP int', 'SH int', 'SF int', 'IBB int', 'Pos text', 'Awards text',
@@ -165,4 +171,4 @@ if __name__ == '__main__':
     # create_tables(batting_stats, pitching_stats)
 
     # Run to generate the sql table
-    transfer_to_sql_table(player_years)
+    # transfer_to_sql_table(player_years)

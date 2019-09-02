@@ -1,7 +1,15 @@
+from flask import Flask
 '''
-- create a flask app or even a django app (depending on how much time I have left)
-- create a single page application to show that I can use it to create a website to 
-- select players and show stats and compare with other players
+- create a flask app 
+- create panels that display stats of players EXCEPT with either height or weight emphasized
+- for now just do two screens with display data for weight or height (height and weight could just be options)
+- one bubble chart displays the chosen stat, other one line chart displays either height or weight
 - my new feature is that I can compare using weight and height, which isn't common in other webistes
 - grab data from sql datatable
+- using d3 js
 '''
+
+app = Flask(__name__)
+
+if __name__ == '__main__':
+    app.run(deubg=True)
