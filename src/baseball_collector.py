@@ -76,20 +76,25 @@ def scrape_data_website():
                 
                 if curr_year_stats != None:
                     player_years[str(curr_year)].append([])
-                    player_years[str(curr_year)][-1].append(player_name)
-                    player_years[str(curr_year)][-1].append(curr_year)
+
+                    if "'" in player_name:
+                        player_years[str(curr_year)][-1].append("'{}'".format(player_name[0:player_name.index("'")] + 
+                            player_name[player_name.index("'") + 1:]))
+                        # print(player_name)
+                    else:
+                        player_years[str(curr_year)][-1].append("'{}'".format(player_name))
+                    
+                    player_years[str(curr_year)][-1].append(str(curr_year))
 
                     for stat_val in curr_year_stats.find_all('td'):
-                        if '.' in stat_val.text:
-                            player_years[str(curr_year)][-1].append(stat_val.text))
-                        elif stat_val.text.isdigit():
-                            player_years[str(curr_year)][-1].append(stat_val.text))
+                        if ('.' in stat_val.text or stat_val.text.isdigit()):
+                            player_years[str(curr_year)][-1].append(stat_val.text)
                         else:
                             player_years[str(curr_year)][-1].append("'{}'".format(str(stat_val.text)))
 
 
-                    player_years[str(curr_year)][-1].append(player_height)
-                    player_years[str(curr_year)][-1].append(player_weight)
+                    player_years[str(curr_year)][-1].append(str(player_height))
+                    player_years[str(curr_year)][-1].append(str(player_weight))
                 
                 curr_year += 1
 
@@ -118,30 +123,28 @@ def transfer_to_sql_table(data):
     cur = conn.cursor()
 
     print("Inserting into SQL Table...")
-    temp_arr = ['Fernando Abad', '2010', '24', 'HOU', 'NL', '0', '1', '0.0', '2.84', '22', '0', '6', '0', '0', '0', '19.0', '14', '6', '6', '3', '5', '0', '12', '0', '0', '0', '76', '142', '4.66', '1.0', '6.6', '1.4', '2.4', '5.7', '2.4', '', '73', '220']
-    new_arr = []
-    for i in temp_arr:
-        new_arr.append("'{}'".format(i))
-    a = ','.join(new_arr)
-    print(a)
-    cur.execute('''
-        INSERT INTO PitchingStats VALUES ({})
-    '''.format(a))
-    # for year in data.keys():
-    #     print('Current year: {}'.format(year))
-    #     for player_stats in data[year]:
-    #         # print(player_stats)
-    #         if len(player_stats) == 38:
-    #             print(player_stats)
-    #             print('Insert to pitching')
-    #             cur.execute('''
-    #                 INSERT INTO PitchingStats VALUES ({})
-    #             '''.format(','.join(player_stats)))
-    #         else:
-    #             print('Insert to batting')
-    #             cur.execute('''
-    #                 INSERT INTO BattingStats VALUES ({})
-    #             '''.format(','.join(player_stats)))
+    # temp_arr = ["'Fernando Abad'", '2010', '24', "'HOU'", "'NL'", '0', '1', '0.0', '2.84', '22', '0', '6', '0', '0', '0', '19.0', '14', '6', '6', '3', '5', '0', '12', '0', '0', '0', '76', '142', '4.66', '1.0', '6.6', '1.4', '2.4', '5.7', '2.4', "''", '73', '220']
+
+    # a = ','.join(temp_arr)
+    # print(a)
+    # cur.execute('''
+    #     INSERT INTO PitchingStats VALUES ({})
+    # '''.format(a))
+    for year in data.keys():
+        print('Current year: {}'.format(year))
+        for player_stats in data[year]:
+            print(player_stats)
+            if len(player_stats) == 38:
+                # print(player_stats)
+                print('Insert to pitching')
+                cur.execute('''
+                    INSERT INTO PitchingStats VALUES ({})
+                '''.format(','.join(player_stats)))
+            else:
+                print('Insert to batting')
+                cur.execute('''
+                    INSERT INTO BattingStats VALUES ({})
+                '''.format(','.join(player_stats)))
     
 
     conn.commit()
@@ -149,7 +152,7 @@ def transfer_to_sql_table(data):
 
     
 if __name__ == '__main__':
-    # player_years = scrape_data_website()
+    player_years = scrape_data_website()
 
     batting_stats = ['Name text', 'Year int', 'Age int', 'Team text', 'League text', 'GamesPlayed int', 'PlateAppearances int', 'AtBats int', 'Runs int', 'Hits int', 'Doubles int', 'Triples int',
         'HR int', 'RBI int', 'SB int', 'CS int', 'BB int', 'SO int', 'BA real', 'OBP real', 'SLG real', 'OPS real', 'OPSPlus real', 'TB int', 'GBP int', 'HBP int', 'SH int', 'SF int', 'IBB int', 'Pos text', 'Awards text',
@@ -160,4 +163,6 @@ if __name__ == '__main__':
         'H9 real', 'HR9 real', 'BB9 real', 'SO9 real', 'StrikeoutsPerWalk real', 'Awards text', 'Height int', 'Weight int']
 
     # create_tables(batting_stats, pitching_stats)
-    transfer_to_sql_table(pitching_stats)
+
+    # Run to generate the sql table
+    transfer_to_sql_table(player_years)
