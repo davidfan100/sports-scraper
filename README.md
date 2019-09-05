@@ -1,7 +1,8 @@
 # sports-scraper
-A web scrapper that will obtain current mlb players baseball statistics and store it into
-an sql table. THe data will contain the typical stats as from the website except with height
-and weight added. The data will obtain data from 2003 to 2018
+A web scrapper that will obtain mlb players baseball statistics and store it into
+an sql table. The data will contain the typical stats as from the website except with height
+and weight added. The data will obtain data from 2015 to 2019 and contains only current playaers 
+(meaning some players in 2017 may be left off because they aren't playing currently)
 
 The web application will have users choose specific statistics for players based on a year and will then
 have a bubble graph displaying the chosen stat's top 10 players and a line graph that displays

@@ -12,8 +12,29 @@ import datetime
 from bs4 import BeautifulSoup
 
 def scrape_stats_by_year():
-    base_url = 'https://www.baseball-reference.com/leagues/MLB/'
-    start_year = str(2003)
+    base_url = 'https://www.baseball-reference.com/leagues/MLB/2003-standard-pitching.shtml'
+    response = requests.get(base_url)
+
+    soup_handler = BeautifulSoup(response.text, 'html.parser')
+    temp = soup_handler.find(id='all_players_standard_pitching')
+    temp2 = temp.find('div', {'class': "table_outer_container"})
+
+    start_year = 2015
+
+    most_recent_year = datetime.datetime.now().year
+    stats_name = ['batting', 'pitching']
+    # while start_year < most_recent_year:
+    for name in stats_name:
+        curr_url = base_url + "{}-standard-{}.shtml".format(str(start_year), name)
+        response = requests.get(curr_url)
+
+        soup_handler = BeautifulSoup(response.text, "html.parser")
+        full_season_players = soup_handler.find_all('tbody')
+        print(full_season_players)
+        # temp = full_season_players.find_all('tr', {'class': 'full_table'})
+       
+        # start_year += 1
+
     return
 def scrape_stats_by_player():
     start_url = 'https://www.baseball-reference.com/players/'
@@ -157,8 +178,8 @@ def transfer_to_sql_table(data):
 
     
 if __name__ == '__main__':
-    # player_years = scrape_stats_by_player()
-    scrape_stats_by_year()
+    player_years = scrape_stats_by_player()
+    # scrape_stats_by_year()
 
     batting_stats = ['Name text', 'Year int', 'Age int', 'Team text', 'League text', 'GamesPlayed int', 'PlateAppearances int', 'AtBats int', 'Runs int', 'Hits int', 'Doubles int', 'Triples int',
         'HR int', 'RBI int', 'SB int', 'CS int', 'BB int', 'SO int', 'BA real', 'OBP real', 'SLG real', 'OPS real', 'OPSPlus real', 'TB int', 'GBP int', 'HBP int', 'SH int', 'SF int', 'IBB int', 'Pos text', 'Awards text',
