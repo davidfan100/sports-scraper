@@ -1,4 +1,5 @@
-from flask import Flask
+from flask import Flask, render_template
+
 '''
 - create a flask app 
 - create panels that display stats of players EXCEPT with either height or weight emphasized
@@ -11,5 +12,8 @@ from flask import Flask
 
 app = Flask(__name__)
 
+@app.route('/')
+def home():
+    return '<h1>Hello World!</h1>'
 if __name__ == '__main__':
-    app.run(deubg=True)
+    app.run(debug=True)
