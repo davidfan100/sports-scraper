@@ -1,0 +1,9 @@
+#statsMenuButton, #figureMenuButton, #yearMenuButton {
+    margin-left: 30px;
+    margin-top: 2.5vh;
+}
+
+.dropdown-menu {
+    max-height: 200px;
+    overflow-x: hidden;
+}
