@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
 import sqlite3
+import json
 '''
 - create a flask app 
 - create panels that display stats of players EXCEPT with either height or weight emphasized
@@ -23,9 +24,9 @@ def home_post():
     # list stats that need don't need to be sorted
     non_sorted_stats = ['ERA', 'FIP', 'WHIP', 'H9', 'HR9', 'BB9', 'SO9']
 
-    is_desc = ""
-    if data_dict['Stat'] not in non_sorted_stats:
-        is_dec = "DESC"
+    is_desc = "DESC"
+    if data_dict['Stat'] in non_sorted_stats:
+        is_dec = ""
     
     sql_query = '''
     select name, {}, {} from PitchingStats where Year={} and IP >= 162 order by {} {} LIMIT 10
@@ -33,9 +34,15 @@ def home_post():
 
     conn = sqlite3.connect('../data/baseballtable.db')
     cur = conn.cursor()
-
+    
     cur.execute(sql_query)
-    print(cur.fetchall())
-    return 'hi'
+    format_dict = {}
+
+    for row in cur.fetchall():
+        format_dict[row[0]] = {}
+        format_dict[row[0]]['Stat'] = row[1]
+        format_dict[row[0]]['Measure'] = row[2]
+
+    return json.dumps(format_dict)
 if __name__ == '__main__':
     app.run(debug=True)

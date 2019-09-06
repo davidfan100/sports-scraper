@@ -37,7 +37,7 @@ function extractDataFormSql() {
             type: 'POST',
             data: dataToSend,
             success: function(result) {
-                return data_obj(result)
+                return createCharts(result)
             },
             error: function(error) {
                 console.log(error)
@@ -45,7 +45,34 @@ function extractDataFormSql() {
         })
     }
 }
-function createCharts(data_obj) {
+function createCharts(data_str) {
+    var data_obj = JSON.parse(data_str)
+    var players = []
+    var measurements = []
+    var stats = []
+
+    var keys = Object.keys(data_obj)
+    for (var i = 0; i < keys.length; i++) {
+        players.push(keys[i])
+        measurements.push(data_obj[keys[i]]['Measure'])
+        stats.push(data_obj[keys[i]]['Stat'])
+    }
+
+    var svg = d3.select('#bar_chart')
+    var margin = 50
+    var width = svg.attr("width")
+    var height = svg.attr("height") - margin
+
+    var xScale = d3.scaleBand().range([0, width]).padding(0.1)
+    var yScale = d3.scaleLinear().range([height, 0])
+
+    var g = svg.append('g')
+
+    xScale.domain(players)
+    yScale.domain([0, d3.max(0, measurements)])
+
+    g.append('g').attr("transform", "translate(0," + (height - 50) + ")").call(d3.axisBottom(xScale).ticks(10)).selectAll("text").attr('transform', 'rotate(45)').attr('dx', '2.5em')
+    g.append('g').call(d3.axisLeft(yScale).ticks(10)).append("text").attr("y", 6).attr("dy", "0.71em").attr('transform', 'rotate(90)').attr("text-anchor", "end")
 
 }
 
