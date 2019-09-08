@@ -7,3 +7,15 @@
     max-height: 200px;
     overflow-x: hidden;
 }
+
+.bar {
+    fill: steelblue;
+}
+
+.highlight {
+    fill: #ebcf34;
+}
+
+.val {
+    font-size: 12px;
+}

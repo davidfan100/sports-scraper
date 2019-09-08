@@ -50,30 +50,82 @@ function createCharts(data_str) {
     var players = []
     var measurements = []
     var stats = []
-
+    var final_data = []
     var keys = Object.keys(data_obj)
     for (var i = 0; i < keys.length; i++) {
-        players.push(keys[i])
-        measurements.push(data_obj[keys[i]]['Measure'])
-        stats.push(data_obj[keys[i]]['Stat'])
+        final_data.push({})
+        final_data[final_data.length - 1]["name"] = keys[i]
+        final_data[final_data.length - 1]["stat"] = data_obj[keys[i]]['Stat']
+        final_data[final_data.length - 1]["measure"] = data_obj[keys[i]]['Measure']
     }
 
     var svg = d3.select('#bar_chart')
-    var margin = 50
+    var margin = 200
     var width = svg.attr("width")
     var height = svg.attr("height") - margin
 
-    var xScale = d3.scaleBand().range([0, width]).padding(0.1)
+    svg.append("text")
+       .attr("transform", "translate(100,0")
+       .attr("x", 120)
+       .attr("y", 50)
+       .attr("font-size", "24px")
+       .text("Player's Measurements based on Statistic")
+    var xScale = d3.scaleBand().range([0, width]).padding(0.5)
     var yScale = d3.scaleLinear().range([height, 0])
 
-    var g = svg.append('g')
+    var g = svg.append('g').attr("transform", "translate(" + 25 + ',' + 100 + ")")
 
-    xScale.domain(players)
-    yScale.domain([0, d3.max(0, measurements)])
+    xScale.domain(final_data.map(function(d) {return d.name}))
+    yScale.domain([50, d3.max(final_data.map(function(d) {return d.measure}))])
 
-    g.append('g').attr("transform", "translate(0," + (height - 50) + ")").call(d3.axisBottom(xScale).ticks(10)).selectAll("text").attr('transform', 'rotate(45)').attr('dx', '2.5em')
-    g.append('g').call(d3.axisLeft(yScale).ticks(10)).append("text").attr("y", 6).attr("dy", "0.71em").attr('transform', 'rotate(90)').attr("text-anchor", "end")
+    g.append('g').attr("transform", "translate(0," + height + ")").call(d3.axisBottom(xScale)).selectAll("text").style("font-size", 7)
+    g.append('g').call(d3.axisLeft(yScale).ticks(10)).append("text").attr("y", 6).attr("dy", "0.71em").attr("text-anchor", "end").text('value')
 
+    g.selectAll(".bar")
+     .data(final_data)
+     .enter().append("rect")
+     .attr("class", "bar")
+     .on("mouseover", onMouseOver)
+     .on("mouseout", onMouseOut)
+     .attr("x", function(d) { return xScale(d.name)})
+     .attr("y", function(d) { return yScale(d.measure)})
+     .attr("width", xScale.bandwidth())
+     .attr("height", function(d) { return height - yScale(d.measure)})
+
+     function onMouseOver(d, i) {
+         d3.select(this).attr('class', 'highlight')
+         d3.select(this)
+           .transition()
+           .duration(400)
+           .attr('width', xScale.bandwidth() + 5)
+           .attr("y", function(d) { return yScale(d.measure) - 10})
+           .attr("height", function(d) {return height - yScale(d.measure) + 10})
+
+        g.append("text")
+         .attr('class', 'val')
+         .attr('x', function() {
+             return xScale(d.name) + 8
+         })
+         .attr('y', function() {
+             return yScale(d.measure) - 15
+         })
+         .text(function() {
+             console.log(d.measure)
+             return [d.measure]
+         })
+     }
+
+     function onMouseOut(d, i) {
+        d3.select(this).attr('class', 'bar')
+        d3.select(this)
+          .transition()
+          .duration(400)
+          .attr('width', xScale.bandwidth())
+          .attr("y", function(d) {return yScale(d.measure)})
+          .attr("height", function(d) { return height - yScale(d.measure)})
+
+        d3.selectAll('.val').remove()
+     }
 }
 
 ///
