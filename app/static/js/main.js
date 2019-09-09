@@ -84,8 +84,8 @@ function createCharts(data_str) {
      .data(final_data)
      .enter().append("rect")
      .attr("class", "bar")
-     .on("mouseover", onMouseOver2)
-     .on("mouseout", onMouseOut2)
+    //  .on("mouseover", onMouseOver2)
+    //  .on("mouseout", onMouseOut2)
      .attr("x", function(d) { return xScale(d.name)})
      .attr("y", function(d) { return yScale2(d.stat)})
      .attr("width", xScale.bandwidth())
@@ -217,14 +217,13 @@ function createCharts(data_str) {
      .attr("height", function(d) { return height - yScale(d.measure)})
 
      function onMouseOver(d, i) {
-         console.log(d)
          d3.select(this).attr('class', 'highlight')
          d3.select(this)
            .transition()
            .duration(400)
            .attr('width', xScale.bandwidth() + 5)
-           .attr("y", function(d) { return yScale2(d.measure) - 10})
-           .attr("height", function(d) {return height - yScale2(d.measure) + 10})
+           .attr("y", function(d) { return yScale(d.measure) - 10})
+           .attr("height", function(d) {return height - yScale(d.measure) + 10})
 
         g.append("text")
          .attr('class', 'val')
@@ -232,7 +231,7 @@ function createCharts(data_str) {
              return xScale(d.name) + 8
          })
          .attr('y', function() {
-             return yScale2(d.measure) - 15
+             return yScale(d.measure) - 15
          })
          .text(function() {
              return [d.measure]
