@@ -1,5 +1,9 @@
 # sports-scraper-application
 
+## Goal
+To create an application that will show any correlations between a player's body measurement and performance
+statistic for choosing better players in fantasy baseball drafting
+
 ## Description
 A web scrapper that will obtain mlb players baseball statistics and store it into
 an sql table. The data will contain the typical stats as from the website except with height
